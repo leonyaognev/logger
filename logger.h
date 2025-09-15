@@ -25,6 +25,17 @@ enum class LogLevel { TRACE, INFO, WARN, ERROR };
 #define CLR_RESET "\033[0m"
 
 // -------------------------------------------------------------
+// Main logging function
+// level - log level (TRACE, INFO, WARN, ERROR)
+// file  - source file name (__FILE__)
+// func  - function name (__func__)
+// line  - line number (__LINE__)
+// fmt   - printf-style format string
+// -------------------------------------------------------------
+void logMessage(LogLevel lvl, const char *file, const char *func, int line,
+                const char *fmt, ...);
+
+// -------------------------------------------------------------
 // Logging macros
 // If DEBUG is defined, these macros call logMessage() with
 // the correct level, file, function, and line information.

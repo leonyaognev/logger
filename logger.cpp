@@ -13,14 +13,6 @@ static std::ofstream logFile;
 // Mutex to synchronize access to logger in multithreaded environment
 static std::mutex logMutex;
 
-// -------------------------------------------------------------
-// Main logging function
-// level - log level (TRACE, INFO, WARN, ERROR)
-// file  - source file name (__FILE__)
-// func  - function name (__func__)
-// line  - line number (__LINE__)
-// fmt   - printf-style format string
-// -------------------------------------------------------------
 void logMessage(LogLevel level, const char *file, const char *func, int line,
                 const char *fmt, ...) {
 
