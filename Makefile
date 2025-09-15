@@ -46,11 +46,9 @@ $(TARGET): $(OBJ)
 	@ar rcs $(TARGET) $(OBJ)
 	@sleep 0.2
 	@$(call print_bar,1,1,library archive:   )
-	@echo "✅ Built $(TARGET)"
 
 clean:
 	@rm -rf ./build ./$(TARGET)
-	@echo "🧹 Clean done"
 
 rebuild: clean all
 
