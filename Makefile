@@ -1,6 +1,6 @@
 # Compiler and flags
-CXX       = g++
-CXXFLAGS  = -Wall -Wextra -Werror -I.
+CXX       = gcc
+CXXFLAGS  = -x c++ -std=c++20 -lstdc++ -lpthread -Wall -Wextra -Werror -I.
 
 # Sources and objects
 SRC       = logger.cpp
