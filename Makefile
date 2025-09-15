@@ -39,13 +39,13 @@ build/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
 	$(eval DONE := $(shell expr $(DONE) + 1))
-	@$(call print_bar,$(DONE),$(TOTAL),object compilation:)
+	@$(call print_bar,$(DONE),$(TOTAL),object compilation: )
 
 $(TARGET): $(OBJ)
-	@$(call print_bar,1,2,library archive:   )
+	@$(call print_bar,1,2,library archive:    )
 	@ar rcs $(TARGET) $(OBJ)
 	@sleep 0.2
-	@$(call print_bar,1,1,library archive:   )
+	@$(call print_bar,1,1,library archive:    )
 
 clean:
 	@rm -rf ./build ./$(TARGET)
