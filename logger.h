@@ -1,26 +1,48 @@
 #pragma once
 
+// -------------------------------------------------------------
+// Log levels enumeration
+// -------------------------------------------------------------
 enum class LogLevel { TRACE, INFO, WARN, ERROR };
 
-// Цвета ANSI
+// -------------------------------------------------------------
+// Default log file name
+// -------------------------------------------------------------
+#define LOG_FILE "app.log"
+
+// -------------------------------------------------------------
+// ANSI color codes for console output
+// TRACE  -> gray
+// INFO   -> green
+// WARN   -> yellow
+// ERROR  -> red
+// CLR_RESET resets console color
+// -------------------------------------------------------------
 #define CLR_TRACE "\033[90m"
 #define CLR_INFO "\033[32m"
 #define CLR_WARN "\033[33m"
 #define CLR_ERROR "\033[31m"
 #define CLR_RESET "\033[0m"
 
+// -------------------------------------------------------------
+// Logging macros
+// If DEBUG is defined, these macros call logMessage() with
+// the correct level, file, function, and line information.
+// Otherwise, they expand to nothing, effectively disabling logging.
+// -------------------------------------------------------------
 #ifdef DEBUG
-#define LOG_TRACE(fmt, ...)                                                    \
+#define log_trace(fmt, ...)                                                    \
   logMessage(LogLevel::TRACE, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
-#define LOG_INFO(fmt, ...)                                                     \
+#define log_info(fmt, ...)                                                     \
   logMessage(LogLevel::INFO, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
-#define LOG_WARN(fmt, ...)                                                     \
+#define log_warn(fmt, ...)                                                     \
   logMessage(LogLevel::WARN, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
-#define LOG_ERROR(fmt, ...)                                                    \
+#define log_error(fmt, ...)                                                    \
   logMessage(LogLevel::ERROR, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-#define LOG_TRACE(fmt, ...)
-#define LOG_INFO(fmt, ...)
-#define LOG_WARN(fmt, ...)
-#define LOG_ERROR(fmt, ...)
+// When DEBUG is not defined, all macros do nothing
+#define log_trace(fmt, ...)
+#define log_info(fmt, ...)
+#define log_warn(fmt, ...)
+#define log_error(fmt, ...)
 #endif

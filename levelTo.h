@@ -2,6 +2,10 @@
 
 #include "logger.h"
 
+// -------------------------------------------------------------
+// Converts a LogLevel enum value to a string representation
+// Example: LogLevel::TRACE -> "TRACE"
+// -------------------------------------------------------------
 static const char *levelToStr(LogLevel lvl) {
   switch (lvl) {
   case LogLevel::TRACE:
@@ -13,10 +17,15 @@ static const char *levelToStr(LogLevel lvl) {
   case LogLevel::ERROR:
     return "ERROR";
   default:
-    return "UNKNOWN";
+    return "UNKNOWN"; // fallback for undefined values
   }
 }
 
+// -------------------------------------------------------------
+// Returns ANSI color code string for a given LogLevel
+// Used for colored console output
+// TRACE -> gray, INFO -> green, WARN -> yellow, ERROR -> red
+// -------------------------------------------------------------
 static const char *levelToColor(LogLevel lvl) {
   switch (lvl) {
   case LogLevel::TRACE:
@@ -28,6 +37,6 @@ static const char *levelToColor(LogLevel lvl) {
   case LogLevel::ERROR:
     return CLR_ERROR;
   default:
-    return CLR_RESET;
+    return CLR_RESET; // fallback: reset color
   }
 }
