@@ -41,19 +41,30 @@ void logMessage(LogLevel lvl, const char *file, const char *func, int line,
 // the correct level, file, function, and line information.
 // Otherwise, they expand to nothing, effectively disabling logging.
 // -------------------------------------------------------------
-#ifdef DEBUG
+#if DEBUG_LEVEL >= 4
 #define log_trace(fmt, ...)                                                    \
   logMessage(LogLevel::TRACE, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+#else
+#define log_trace(fmt, ...) ((void)0)
+#endif
+
+#if DEBUG_LEVEL >= 3
 #define log_info(fmt, ...)                                                     \
   logMessage(LogLevel::INFO, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+#else
+#define log_info(fmt, ...) ((void)0)
+#endif
+
+#if DEBUG_LEVEL >= 2
 #define log_warn(fmt, ...)                                                     \
   logMessage(LogLevel::WARN, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
+#else
+#define log_warn(fmt, ...) ((void)0)
+#endif
+
+#if DEBUG_LEVEL >= 1
 #define log_error(fmt, ...)                                                    \
   logMessage(LogLevel::ERROR, __FILE__, __func__, __LINE__, fmt, ##__VA_ARGS__)
 #else
-// When DEBUG is not defined, all macros do nothing
-#define log_trace(fmt, ...)
-#define log_info(fmt, ...)
-#define log_warn(fmt, ...)
-#define log_error(fmt, ...)
+#define log_error(fmt, ...) ((void)0)
 #endif
