@@ -35,6 +35,9 @@ DONE  := 0
 # ---------------------------------------------------------------------------
 all: $(TARGET)
 
+example: $(TARGET)
+	@$(CXX) $(CXXFLAGS) ./example.cpp -L. -l:./$(TARGET) -o example -DDEBUG_LEVEL=4
+
 build/%.o: %.cpp
 	@mkdir -p $(dir $@)
 	@$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -48,7 +51,7 @@ $(TARGET): $(OBJ)
 	@$(call print_bar,1,1,library archive:    )
 
 clean:
-	@rm -rf ./build ./$(TARGET)
+	@rm -rf ./build ./$(TARGET) ./example
 
 rebuild: clean all
 
