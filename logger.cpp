@@ -1,54 +1,108 @@
+#include <atomic>
+#include <condition_variable>
 #include <cstdarg>
 #include <ctime>
 #include <fstream>
 #include <iostream>
 #include <mutex>
+#include <queue>
+#include <string>
+#include <thread>
 
 #include "levelTo.h"
 #include "logger.h"
 
-// Global ofstream object for logging to a file
-static std::ofstream logFile;
+struct LogTask {
+  LogLevel level;
+  std::string file;
+  std::string func;
+  int line;
+  std::string message;
+  std::string timestamp;
+};
 
-// Mutex to synchronize access to logger in multithreaded environment
-static std::mutex logMutex;
+class AsyncLogger {
+public:
+  AsyncLogger(const std::string &filePath)
+      : stopFlag(false), logFile(filePath, std::ios::app) {
+    worker = std::thread(&AsyncLogger::processQueue, this);
+  }
+
+  ~AsyncLogger() {
+    {
+      std::lock_guard<std::mutex> lock(queueMutex);
+      stopFlag = true;
+    }
+    cv.notify_one();
+    if (worker.joinable())
+      worker.join();
+    logFile.close();
+  }
+
+  void log(LogLevel level, const char *file, const char *func, int line,
+           const char *fmt, va_list args) {
+    char buf[1024];
+    vsnprintf(buf, sizeof(buf), fmt, args);
+
+    // timestamp
+    std::time_t t = std::time(nullptr);
+    std::tm tm_info{};
+    localtime_r(&t, &tm_info);
+    char timeBuf[20];
+    std::strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", &tm_info);
+
+    LogTask task{level, file, func, line, buf, timeBuf};
+
+    {
+      std::lock_guard<std::mutex> lock(queueMutex);
+      queue.push(std::move(task));
+    }
+    cv.notify_one();
+  }
+
+private:
+  void processQueue() {
+    while (true) {
+      std::unique_lock<std::mutex> lock(queueMutex);
+      cv.wait(lock, [this] { return !queue.empty() || stopFlag; });
+
+      if (stopFlag && queue.empty())
+        break;
+
+      LogTask task = std::move(queue.front());
+      queue.pop();
+      lock.unlock();
+
+      // console output
+      std::cout << levelToColor(task.level) << "[" << levelToStr(task.level)
+                << "] " << CLR_RESET << task.timestamp << " " << task.file
+                << ":" << task.line << " " << task.func
+                << "(): " << task.message << std::endl;
+
+      // file output
+      if (logFile.is_open()) {
+        logFile << "[" << levelToStr(task.level) << "] " << task.timestamp
+                << " " << task.file << ":" << task.line << " " << task.func
+                << "(): " << task.message << std::endl;
+      }
+    }
+  }
+
+  std::mutex queueMutex;
+  std::condition_variable cv;
+  std::queue<LogTask> queue;
+  std::thread worker;
+  std::atomic<bool> stopFlag;
+  std::ofstream logFile;
+};
+
+// --- global logger instance ---
+static AsyncLogger g_logger(LOG_FILE);
 
 void logMessage(LogLevel level, const char *file, const char *func, int line,
                 const char *fmt, ...) {
-
-  // Lock the mutex to ensure thread safety for console and file output
-  std::lock_guard<std::mutex> lock(logMutex);
-
-  // Open log file in append mode if it's not already open
-  if (!logFile.is_open()) {
-    logFile.open(LOG_FILE, std::ios::app);
-  }
-
-  // Get current time
-  std::time_t t = std::time(nullptr);
-  std::tm tm_info{};
-  localtime_r(&t, &tm_info); // Thread-safe conversion to local time
-
-  // Format time as "YYYY-MM-DD HH:MM:SS"
-  char timeBuf[20];
-  std::strftime(timeBuf, sizeof(timeBuf), "%Y-%m-%d %H:%M:%S", &tm_info);
-
-  // Format user-provided message with variable arguments
-  char userBuf[1024];  // buffer for formatted message
-  va_list args;        // variable argument list
-  va_start(args, fmt); // initialize argument list
-  vsnprintf(userBuf, sizeof(userBuf), fmt, args); // safely format string
-  va_end(args);                                   // clean up
-
-  // Output log to console with color for the log level
-  std::cout << levelToColor(level) << "[" << levelToStr(level) << "] "
-            << CLR_RESET // reset console color
-            << timeBuf << " " << file << ":" << line << " " << func
-            << "(): " << userBuf << std::endl;
-
-  // Output log to file (without color)
-  if (logFile.is_open()) {
-    logFile << "[" << levelToStr(level) << "] " << timeBuf << " " << file << ":"
-            << line << " " << func << "(): " << userBuf << std::endl;
-  }
+  va_list args;
+  va_start(args, fmt);
+  g_logger.log(level, file, func, line, fmt, args);
+  va_end(args);
 }
