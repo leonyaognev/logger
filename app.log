@@ -1,4 +1,0 @@
-[TRACE] 2025-09-21 11:53:26 ./example.cpp:4 main(): Hello from trace
-[INFO] 2025-09-21 11:53:26 ./example.cpp:5 main(): This is an info message
-[WARN] 2025-09-21 11:53:26 ./example.cpp:6 main(): Something might be wrong
-[ERROR] 2025-09-21 11:53:26 ./example.cpp:7 main(): Oops, something broke
